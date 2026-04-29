@@ -1,0 +1,1046 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pokémon GO Typing Quiz 1 — Super Effective</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: rgba(255,255,255,.96);
+      --ink: #172033;
+      --muted: #64748b;
+      --line: #dbe3ef;
+      --good: #16a34a;
+      --bad: #dc2626;
+      --warn: #f59e0b;
+      --brand: #2563eb;
+      --soft: #f8fafc;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(59,130,246,.30), transparent 32rem),
+        radial-gradient(circle at bottom right, rgba(250,204,21,.24), transparent 28rem),
+        linear-gradient(135deg, #0f172a 0%, #111827 48%, #172554 100%);
+      padding: 24px;
+    }
+    .app { max-width: 980px; margin: 0 auto; }
+    .hero {
+      color: white;
+      padding: 22px 4px 24px;
+    }
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: #bfdbfe;
+      font-weight: 800;
+      font-size: 12px;
+    }
+    h1 {
+      margin: 8px 0 10px;
+      font-size: clamp(30px, 5vw, 52px);
+      line-height: 1;
+    }
+    .hero p {
+      color: #dbeafe;
+      margin: 0;
+      max-width: 760px;
+      font-size: 17px;
+      line-height: 1.55;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,.5);
+      border-radius: 26px;
+      box-shadow: 0 22px 70px rgba(2,8,23,.35);
+      overflow: hidden;
+    }
+    .topbar {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--line);
+      display: grid;
+      gap: 14px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      font-weight: 800;
+      font-size: 13px;
+    }
+    .progress-wrap {
+      height: 12px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      overflow: hidden;
+    }
+    .progress {
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #60a5fa, #22c55e);
+      transition: width .25s ease;
+    }
+    .content { padding: 24px; }
+    .question-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 18px;
+    }
+    .q-number { color: var(--muted); font-weight: 800; font-size: 14px; }
+    .attack-badge {
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-weight: 900;
+      border: 1px solid rgba(0,0,0,.1);
+      color: white;
+      text-shadow: 0 1px 2px rgba(0,0,0,.35);
+      white-space: nowrap;
+    }
+    h2 {
+      margin: 0;
+      font-size: clamp(22px, 3vw, 32px);
+      line-height: 1.18;
+    }
+    .hint {
+      margin: 10px 0 22px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+    .options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .option {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 54px;
+      padding: 12px;
+      border-radius: 18px;
+      border: 2px solid #dbe3ef;
+      background: white;
+      cursor: pointer;
+      user-select: none;
+      font-weight: 900;
+      transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease, background .12s ease;
+    }
+    .option:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(15,23,42,.08); }
+    .option.selected { border-color: var(--brand); background: #eff6ff; }
+    .option.correct { border-color: var(--good); background: #dcfce7; color: #14532d; }
+    .option.missed { border-color: var(--warn); background: #fef3c7; color: #78350f; }
+    .option.wrong { border-color: var(--bad); background: #fee2e2; color: #7f1d1d; }
+    .swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,.18);
+      flex: 0 0 auto;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    button {
+      appearance: none;
+      border: 0;
+      border-radius: 16px;
+      padding: 13px 18px;
+      font-weight: 900;
+      cursor: pointer;
+      font-size: 15px;
+    }
+    .primary { background: #2563eb; color: white; }
+    .secondary { background: #e2e8f0; color: #0f172a; }
+    .ghost { background: transparent; color: #2563eb; }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    .feedback {
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: 20px;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      display: none;
+    }
+    .feedback.show { display: block; }
+    .feedback.good { border-color: rgba(22,163,74,.35); background: #f0fdf4; }
+    .feedback.bad { border-color: rgba(220,38,38,.28); background: #fff7ed; }
+    .feedback h3 { margin: 0 0 8px; font-size: 20px; }
+    .answer-line { margin: 8px 0 0; color: #334155; line-height: 1.5; }
+    .review {
+      display: none;
+      padding: 24px;
+    }
+    .review.show { display: block; }
+    .scorebox {
+      display: grid;
+      gap: 12px;
+      padding: 22px;
+      border-radius: 22px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      margin-bottom: 18px;
+    }
+    .score {
+      font-size: 42px;
+      font-weight: 950;
+      color: #1d4ed8;
+      line-height: 1;
+    }
+    .review-list {
+      display: grid;
+      gap: 12px;
+    }
+    .review-item {
+      padding: 16px;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+    }
+    .source {
+      margin: 18px 4px 0;
+      color: #cbd5e1;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    @media (max-width: 640px) {
+      body { padding: 14px; }
+      .content, .review { padding: 18px; }
+      .question-head { flex-direction: column-reverse; }
+      .attack-badge { white-space: normal; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="hero">
+      <div class="eyebrow">Pokémon GO PvP Typing Academy</div>
+      <h1>Quiz 1: Super Effective</h1>
+      <p>Offensive recognition only. Select every monotype that the attacking type hits for Super Effective damage. Some questions may have no correct monotype targets.</p>
+    </section>
+
+    <section class="card" id="quizCard">
+      <div class="topbar">
+        <div class="meta">
+          <span class="pill" id="progressText">Question 1 of 18</span>
+          <span class="pill">Select ALL correct answers</span>
+          <span class="pill">Monotypes only</span>
+        </div>
+        <div class="progress-wrap"><div class="progress" id="progressBar"></div></div>
+      </div>
+
+      <div class="content" id="quizContent">
+        <div class="question-head">
+          <div>
+            <div class="q-number" id="qNumber"></div>
+            <h2 id="questionText"></h2>
+            <p class="hint">Tap all correct options, then submit. Incorrect attempts show feedback and let players try again.</p>
+          </div>
+          <div class="attack-badge" id="attackBadge"></div>
+        </div>
+
+        <div class="options" id="options"></div>
+
+        <div class="controls">
+          <button class="primary" id="submitBtn">Submit answer</button>
+          <button class="secondary" id="tryBtn" style="display:none;">Try again</button>
+          <button class="secondary" id="showBtn" style="display:none;">Show correct answer</button>
+          <button class="primary" id="nextBtn" style="display:none;">Next question</button>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+      </div>
+
+      <div class="review" id="review">
+        <div class="scorebox">
+          <div class="score" id="finalScore"></div>
+          <div id="scoreMessage"></div>
+          <div style="color:#475569;">This quiz is designed for learning and memorisation. Repeat attempts are encouraged.</div>
+        </div>
+        <div class="controls" style="margin-bottom:18px;">
+          <button class="primary" id="restartBtn">Restart quiz</button>
+        </div>
+        <div class="review-list" id="reviewList"></div>
+      </div>
+    </section>
+
+    <p class="source">Source of truth: Master_PvP_Typing_Spreadsheet(15).xlsx, Attack_Basics sheet. Quiz 1 uses Super Effective monotype targets only.</p>
+  </main>
+
+<script>
+const TYPE_COLORS = {"Normal": "#A8A77A", "Fire": "#EE8130", "Water": "#6390F0", "Electric": "#F7D02C", "Grass": "#7AC74C", "Ice": "#96D9D6", "Fighting": "#C22E28", "Poison": "#A33EA1", "Ground": "#E2BF65", "Flying": "#A98FF3", "Psychic": "#F95587", "Bug": "#A6B91A", "Rock": "#B6A136", "Ghost": "#735797", "Dragon": "#6F35FC", "Dark": "#705746", "Steel": "#B7B7CE", "Fairy": "#D685AD"};
+const QUESTIONS = [
+  {
+    "id": "Q01",
+    "attackType": "Normal",
+    "prompt": "Select all monotypes that Normal attacks are Super Effective against.",
+    "correct": [],
+    "options": [
+      "Normal",
+      "Fire",
+      "Water",
+      "Electric",
+      "Grass",
+      "Ice",
+      "Fighting",
+      "Poison",
+      "Ground",
+      "Flying",
+      "Psychic",
+      "Bug",
+      "Rock",
+      "Ghost",
+      "Dragon",
+      "Dark",
+      "Steel",
+      "Fairy"
+    ],
+    "explanation": "Normal attacks do not have any super-effective targets."
+  },
+  {
+    "id": "Q02",
+    "attackType": "Fire",
+    "prompt": "Select all monotypes that Fire attacks are Super Effective against.",
+    "correct": [
+      "Grass",
+      "Ice",
+      "Bug",
+      "Steel"
+    ],
+    "options": [
+      "Normal",
+      "Fire",
+      "Water",
+      "Electric",
+      "Grass",
+      "Ice",
+      "Fighting",
+      "Poison",
+      "Ground",
+      "Flying",
+      "Psychic",
+      "Bug",
+      "Rock",
+      "Ghost",
+      "Dragon",
+      "Dark",
+      "Steel",
+      "Fairy"
+    ],
+    "explanation": "Fire attacks pressure Grass, Ice, Bug, Steel."
+  },
+  {
+    "id": "Q03",
+    "attackType": "Water",
+    "prompt": "Select all monotypes that Water attacks are Super Effective against.",
+    "correct": [
+      "Fire",
+      "Ground",
+      "Rock"
+    ],
+    "options": [
+      "Normal",
+      "Fire",
+      "Water",
+      "Electric",
+      "Grass",
+      "Ice",
+      "Fighting",
+      "Poison",
+      "Ground",
+      "Flying",
+      "Psychic",
+      "Bug",
+      "Rock",
+      "Ghost",
+      "Dragon",
+      "Dark",
+      "Steel",
+      "Fairy"
+    ],
+    "explanation": "Water attacks pressure Fire, Ground, Rock."
+  },
+  {
+    "id": "Q04",
+    "attackType": "Electric",
+    "prompt": "Select all monotypes that Electric attacks are Super Effective against.",
+    "correct": [
+      "Water",
+      "Flying"
+    ],
+    "options": [
+      "Normal",
+      "Fire",
+      "Water",
+      "Electric",
+      "Grass",
+      "Ice",
+      "Fighting",
+      "Poison",
+      "Ground",
+      "Flying",
+      "Psychic",
+      "Bug",
+      "Rock",
+      "Ghost",
+      "Dragon",
+      "Dark",
+      "Steel",
+      "Fairy"
+    ],
+    "explanation": "Electric attacks pressure Water, Flying."
+  },
+  {
+    "id": "Q05",
+    "attackType": "Grass",
+    "prompt": "Select all monotypes that Grass attacks are Super Effective against.",
+    "correct": [
+      "Water",
+      "Ground",
+      "Rock"
+    ],
+    "options": [
+      "Normal",
+      "Fire",
+      "Water",
+      "Electric",
+      "Grass",
+      "Ice",
+      "Fighting",
+      "Poison",
+      "Ground",
+      "Flying",
+      "Psychic",
+      "Bug",
+      "Rock",
+      "Ghost",
+      "Dragon",
+      "Dark",
+      "Steel",
+      "Fairy"
+    ],
+    "explanation": "Grass attacks pressure Water, Ground, Rock."
+  },
+  {
+    "id": "Q06",
+    "attackType": "Ice",
+    "prompt": "Select all monotypes that Ice attacks are Super Effective against.",
+    "correct": [
+      "Grass",
+      "Ground",
+      "Flying",
+      "Dragon"
+    ],
+    "options": [
+      "Normal",
+      "Fire",
+      "Water",
+      "Electric",
+      "Grass",
+      "Ice",
+      "Fighting",
+      "Poison",
+      "Ground",
+      "Flying",
+      "Psychic",
+      "Bug",
+      "Rock",
+      "Ghost",
+      "Dragon",
+      "Dark",
+      "Steel",
+      "Fairy"
+    ],
+    "explanation": "Ice attacks pressure Grass, Ground, Flying, Dragon."
+  },
+  {
+    "id": "Q07",
+    "attackType": "Fighting",
+    "prompt": "Select all monotypes that Fighting attacks are Super Effective against.",
+    "correct": [
+      "Normal",
+      "Ice",
+      "Rock",
+      "Dark",
+      "Steel"
+    ],
+    "options": [
+      "Normal",
+      "Fire",
+      "Water",
+      "Electric",
+      "Grass",
+      "Ice",
+      "Fighting",
+      "Poison",
+      "Ground",
+      "Flying",
+      "Psychic",
+      "Bug",
+      "Rock",
+      "Ghost",
+      "Dragon",
+      "Dark",
+      "Steel",
+      "Fairy"
+    ],
+    "explanation": "Fighting attacks pressure Normal, Ice, Rock, Dark, Steel."
+  },
+  {
+    "id": "Q08",
+    "attackType": "Poison",
+    "prompt": "Select all monotypes that Poison attacks are Super Effective against.",
+    "correct": [
+      "Grass",
+      "Fairy"
+    ],
+    "options": [
+      "Normal",
+      "Fire",
+      "Water",
+      "Electric",
+      "Grass",
+      "Ice",
+      "Fighting",
+      "Poison",
+      "Ground",
+      "Flying",
+      "Psychic",
+      "Bug",
+      "Rock",
+      "Ghost",
+      "Dragon",
+      "Dark",
+      "Steel",
+      "Fairy"
+    ],
+    "explanation": "Poison attacks pressure Grass, Fairy."
+  },
+  {
+    "id": "Q09",
+    "attackType": "Ground",
+    "prompt": "Select all monotypes that Ground attacks are Super Effective against.",
+    "correct": [
+      "Fire",
+      "Electric",
+      "Poison",
+      "Rock",
+      "Steel"
+    ],
+    "options": [
+      "Normal",
+      "Fire",
+      "Water",
+      "Electric",
+      "Grass",
+      "Ice",
+      "Fighting",
+      "Poison",
+      "Ground",
+      "Flying",
+      "Psychic",
+      "Bug",
+      "Rock",
+      "Ghost",
+      "Dragon",
+      "Dark",
+      "Steel",
+      "Fairy"
+    ],
+    "explanation": "Ground attacks pressure Fire, Electric, Poison, Rock, Steel."
+  },
+  {
+    "id": "Q10",
+    "attackType": "Flying",
+    "prompt": "Select all monotypes that Flying attacks are Super Effective against.",
+    "correct": [
+      "Grass",
+      "Fighting",
+      "Bug"
+    ],
+    "options": [
+      "Normal",
+      "Fire",
+      "Water",
+      "Electric",
+      "Grass",
+      "Ice",
+      "Fighting",
+      "Poison",
+      "Ground",
+      "Flying",
+      "Psychic",
+      "Bug",
+      "Rock",
+      "Ghost",
+      "Dragon",
+      "Dark",
+      "Steel",
+      "Fairy"
+    ],
+    "explanation": "Flying attacks pressure Grass, Fighting, Bug."
+  },
+  {
+    "id": "Q11",
+    "attackType": "Psychic",
+    "prompt": "Select all monotypes that Psychic attacks are Super Effective against.",
+    "correct": [
+      "Fighting",
+      "Poison"
+    ],
+    "options": [
+      "Normal",
+      "Fire",
+      "Water",
+      "Electric",
+      "Grass",
+      "Ice",
+      "Fighting",
+      "Poison",
+      "Ground",
+      "Flying",
+      "Psychic",
+      "Bug",
+      "Rock",
+      "Ghost",
+      "Dragon",
+      "Dark",
+      "Steel",
+      "Fairy"
+    ],
+    "explanation": "Psychic attacks pressure Fighting, Poison."
+  },
+  {
+    "id": "Q12",
+    "attackType": "Bug",
+    "prompt": "Select all monotypes that Bug attacks are Super Effective against.",
+    "correct": [
+      "Grass",
+      "Psychic",
+      "Dark"
+    ],
+    "options": [
+      "Normal",
+      "Fire",
+      "Water",
+      "Electric",
+      "Grass",
+      "Ice",
+      "Fighting",
+      "Poison",
+      "Ground",
+      "Flying",
+      "Psychic",
+      "Bug",
+      "Rock",
+      "Ghost",
+      "Dragon",
+      "Dark",
+      "Steel",
+      "Fairy"
+    ],
+    "explanation": "Bug attacks pressure Grass, Psychic, Dark."
+  },
+  {
+    "id": "Q13",
+    "attackType": "Rock",
+    "prompt": "Select all monotypes that Rock attacks are Super Effective against.",
+    "correct": [
+      "Fire",
+      "Ice",
+      "Flying",
+      "Bug"
+    ],
+    "options": [
+      "Normal",
+      "Fire",
+      "Water",
+      "Electric",
+      "Grass",
+      "Ice",
+      "Fighting",
+      "Poison",
+      "Ground",
+      "Flying",
+      "Psychic",
+      "Bug",
+      "Rock",
+      "Ghost",
+      "Dragon",
+      "Dark",
+      "Steel",
+      "Fairy"
+    ],
+    "explanation": "Rock attacks pressure Fire, Ice, Flying, Bug."
+  },
+  {
+    "id": "Q14",
+    "attackType": "Ghost",
+    "prompt": "Select all monotypes that Ghost attacks are Super Effective against.",
+    "correct": [
+      "Psychic",
+      "Ghost"
+    ],
+    "options": [
+      "Normal",
+      "Fire",
+      "Water",
+      "Electric",
+      "Grass",
+      "Ice",
+      "Fighting",
+      "Poison",
+      "Ground",
+      "Flying",
+      "Psychic",
+      "Bug",
+      "Rock",
+      "Ghost",
+      "Dragon",
+      "Dark",
+      "Steel",
+      "Fairy"
+    ],
+    "explanation": "Ghost attacks pressure Psychic, Ghost."
+  },
+  {
+    "id": "Q15",
+    "attackType": "Dragon",
+    "prompt": "Select all monotypes that Dragon attacks are Super Effective against.",
+    "correct": [
+      "Dragon"
+    ],
+    "options": [
+      "Normal",
+      "Fire",
+      "Water",
+      "Electric",
+      "Grass",
+      "Ice",
+      "Fighting",
+      "Poison",
+      "Ground",
+      "Flying",
+      "Psychic",
+      "Bug",
+      "Rock",
+      "Ghost",
+      "Dragon",
+      "Dark",
+      "Steel",
+      "Fairy"
+    ],
+    "explanation": "Dragon attacks pressure Dragon."
+  },
+  {
+    "id": "Q16",
+    "attackType": "Dark",
+    "prompt": "Select all monotypes that Dark attacks are Super Effective against.",
+    "correct": [
+      "Psychic",
+      "Ghost"
+    ],
+    "options": [
+      "Normal",
+      "Fire",
+      "Water",
+      "Electric",
+      "Grass",
+      "Ice",
+      "Fighting",
+      "Poison",
+      "Ground",
+      "Flying",
+      "Psychic",
+      "Bug",
+      "Rock",
+      "Ghost",
+      "Dragon",
+      "Dark",
+      "Steel",
+      "Fairy"
+    ],
+    "explanation": "Dark attacks pressure Psychic, Ghost."
+  },
+  {
+    "id": "Q17",
+    "attackType": "Steel",
+    "prompt": "Select all monotypes that Steel attacks are Super Effective against.",
+    "correct": [
+      "Ice",
+      "Rock",
+      "Fairy"
+    ],
+    "options": [
+      "Normal",
+      "Fire",
+      "Water",
+      "Electric",
+      "Grass",
+      "Ice",
+      "Fighting",
+      "Poison",
+      "Ground",
+      "Flying",
+      "Psychic",
+      "Bug",
+      "Rock",
+      "Ghost",
+      "Dragon",
+      "Dark",
+      "Steel",
+      "Fairy"
+    ],
+    "explanation": "Steel attacks pressure Ice, Rock, Fairy."
+  },
+  {
+    "id": "Q18",
+    "attackType": "Fairy",
+    "prompt": "Select all monotypes that Fairy attacks are Super Effective against.",
+    "correct": [
+      "Fighting",
+      "Dragon",
+      "Dark"
+    ],
+    "options": [
+      "Normal",
+      "Fire",
+      "Water",
+      "Electric",
+      "Grass",
+      "Ice",
+      "Fighting",
+      "Poison",
+      "Ground",
+      "Flying",
+      "Psychic",
+      "Bug",
+      "Rock",
+      "Ghost",
+      "Dragon",
+      "Dark",
+      "Steel",
+      "Fairy"
+    ],
+    "explanation": "Fairy attacks pressure Fighting, Dragon, Dark."
+  }
+];
+
+let current = 0;
+let selected = new Set();
+let checked = false;
+let score = 0;
+let attempts = QUESTIONS.map(() => 0);
+let solved = QUESTIONS.map(() => false);
+
+const progressText = document.getElementById('progressText');
+const progressBar = document.getElementById('progressBar');
+const qNumber = document.getElementById('qNumber');
+const questionText = document.getElementById('questionText');
+const attackBadge = document.getElementById('attackBadge');
+const optionsEl = document.getElementById('options');
+const feedback = document.getElementById('feedback');
+const submitBtn = document.getElementById('submitBtn');
+const tryBtn = document.getElementById('tryBtn');
+const showBtn = document.getElementById('showBtn');
+const nextBtn = document.getElementById('nextBtn');
+const quizContent = document.getElementById('quizContent');
+const review = document.getElementById('review');
+
+function sameSet(a, b) {
+  if (a.size !== b.size) return false;
+  for (const x of a) if (!b.has(x)) return false;
+  return true;
+}
+
+function correctText(q) {
+  return q.correct.length ? q.correct.join(', ') : 'None of the listed monotypes';
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[current];
+  selected = new Set();
+  checked = false;
+
+  progressText.textContent = `Question ${current + 1} of ${QUESTIONS.length}`;
+  progressBar.style.width = `${(current / QUESTIONS.length) * 100}%`;
+  qNumber.textContent = q.id;
+  questionText.textContent = q.prompt;
+  attackBadge.textContent = `${q.attackType} attack`;
+  attackBadge.style.background = TYPE_COLORS[q.attackType] || '#334155';
+
+  optionsEl.innerHTML = '';
+  q.options.forEach(type => {
+    const div = document.createElement('div');
+    div.className = 'option';
+    div.dataset.type = type;
+    div.innerHTML = `<span class="swatch" style="background:${TYPE_COLORS[type]}"></span><span>${type}</span>`;
+    div.addEventListener('click', () => {
+      if (checked) return;
+      if (selected.has(type)) selected.delete(type);
+      else selected.add(type);
+      div.classList.toggle('selected', selected.has(type));
+    });
+    optionsEl.appendChild(div);
+  });
+
+  feedback.className = 'feedback';
+  feedback.innerHTML = '';
+  feedback.classList.remove('show');
+  submitBtn.style.display = '';
+  tryBtn.style.display = 'none';
+  showBtn.style.display = 'none';
+  nextBtn.style.display = 'none';
+}
+
+function markOptions(showCorrectOnly=false) {
+  const q = QUESTIONS[current];
+  const correct = new Set(q.correct);
+  document.querySelectorAll('.option').forEach(el => {
+    const type = el.dataset.type;
+    el.classList.remove('selected');
+    if (correct.has(type)) el.classList.add('correct');
+    else if (selected.has(type) && !showCorrectOnly) el.classList.add('wrong');
+  });
+}
+
+function submitAnswer() {
+  const q = QUESTIONS[current];
+  attempts[current] += 1;
+  const correct = new Set(q.correct);
+  const isCorrect = sameSet(selected, correct);
+  checked = true;
+
+  if (isCorrect) {
+    if (!solved[current]) {
+      score += 1;
+      solved[current] = true;
+    }
+    markOptions();
+    feedback.className = 'feedback show good';
+    feedback.innerHTML = `<h3>✅ Correct!</h3>
+      <div class="answer-line"><strong>Super Effective targets:</strong> ${correctText(q)}.</div>
+      <div class="answer-line">${q.explanation}</div>`;
+    submitBtn.style.display = 'none';
+    tryBtn.style.display = 'none';
+    showBtn.style.display = 'none';
+    nextBtn.style.display = '';
+  } else {
+    document.querySelectorAll('.option').forEach(el => {
+      const type = el.dataset.type;
+      if (selected.has(type) && !correct.has(type)) el.classList.add('wrong');
+      if (!selected.has(type) && correct.has(type)) el.classList.add('missed');
+    });
+    feedback.className = 'feedback show bad';
+    feedback.innerHTML = `<h3>❌ Not quite — try again.</h3>
+      <div class="answer-line">Red = selected but incorrect. Amber = correct answer missed.</div>
+      <div class="answer-line">Use the feedback to adjust your answer and resubmit.</div>`;
+    submitBtn.style.display = 'none';
+    tryBtn.style.display = '';
+    showBtn.style.display = '';
+    nextBtn.style.display = 'none';
+  }
+}
+
+function tryAgain() {
+  checked = false;
+  selected = new Set();
+  document.querySelectorAll('.option').forEach(el => {
+    el.classList.remove('selected','correct','missed','wrong');
+  });
+  feedback.className = 'feedback';
+  feedback.innerHTML = '';
+  submitBtn.style.display = '';
+  tryBtn.style.display = 'none';
+  showBtn.style.display = 'none';
+}
+
+function showAnswer() {
+  const q = QUESTIONS[current];
+  const correct = new Set(q.correct);
+  checked = true;
+  solved[current] = false;
+  markOptions(true);
+  feedback.className = 'feedback show bad';
+  feedback.innerHTML = `<h3>📘 Correct answer shown</h3>
+    <div class="answer-line"><strong>Super Effective targets:</strong> ${correctText(q)}.</div>
+    <div class="answer-line">${q.explanation}</div>`;
+  submitBtn.style.display = 'none';
+  tryBtn.style.display = 'none';
+  showBtn.style.display = 'none';
+  nextBtn.style.display = '';
+}
+
+function nextQuestion() {
+  current += 1;
+  if (current >= QUESTIONS.length) return showReview();
+  renderQuestion();
+}
+
+function showReview() {
+  progressBar.style.width = '100%';
+  quizContent.style.display = 'none';
+  review.classList.add('show');
+  document.getElementById('finalScore').textContent = `${score} / ${QUESTIONS.length}`;
+  document.getElementById('scoreMessage').textContent =
+    score === QUESTIONS.length ? 'Elite! You completed Quiz 1 perfectly.' :
+    score >= 14 ? 'Great work — repeat the quiz to lock in the remaining patterns.' :
+    'Good learning session — this quiz is designed to be repeated until the patterns feel automatic.';
+
+  const list = document.getElementById('reviewList');
+  list.innerHTML = '';
+  QUESTIONS.forEach((q, i) => {
+    const item = document.createElement('div');
+    item.className = 'review-item';
+    item.innerHTML = `<strong>${q.id} — ${q.attackType} attacks</strong><br>
+      Super Effective against: <strong>${correctText(q)}</strong><br>
+      <span style="color:#64748b;">${q.explanation}</span>`;
+    list.appendChild(item);
+  });
+}
+
+function restart() {
+  current = 0;
+  selected = new Set();
+  checked = false;
+  score = 0;
+  attempts = QUESTIONS.map(() => 0);
+  solved = QUESTIONS.map(() => false);
+  quizContent.style.display = '';
+  review.classList.remove('show');
+  renderQuestion();
+}
+
+submitBtn.addEventListener('click', submitAnswer);
+tryBtn.addEventListener('click', tryAgain);
+showBtn.addEventListener('click', showAnswer);
+nextBtn.addEventListener('click', nextQuestion);
+document.getElementById('restartBtn').addEventListener('click', restart);
+
+renderQuestion();
+</script>
+</body>
+</html>
