@@ -149,6 +149,7 @@
     .option:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(15,23,42,.08); }
     .option.selected { border-color: var(--brand); background: #eff6ff; }
     .option.correct { border-color: var(--good); background: #dcfce7; color: #14532d; }
+    .option.selected-correct { border-color: var(--brand); background: #dbeafe; color: #1e3a8a; }
     .option.missed { border-color: var(--warn); background: #fef3c7; color: #78350f; }
     .option.wrong { border-color: var(--bad); background: #fee2e2; color: #7f1d1d; }
     .swatch {
@@ -163,6 +164,20 @@
       flex-wrap: wrap;
       gap: 12px;
       margin-top: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .controls-main {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .controls-nav {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      margin-left: auto;
     }
     button {
       appearance: none;
@@ -265,10 +280,16 @@
         <div class="options" id="options"></div>
 
         <div class="controls">
-          <button class="primary" id="submitBtn">Submit answer</button>
-          <button class="secondary" id="tryBtn" style="display:none;">Try again</button>
-          <button class="secondary" id="showBtn" style="display:none;">Show correct answer</button>
-          <button class="primary" id="nextBtn" style="display:none;">Next question</button>
+          <div class="controls-main">
+            <button class="primary" id="submitBtn">Submit answer</button>
+            <button class="secondary" id="tryBtn" style="display:none;">Try again</button>
+            <button class="secondary" id="showBtn" style="display:none;">Show correct answer</button>
+          </div>
+          <div class="controls-nav">
+            <button class="secondary" id="hintBtn">Hint</button>
+            <button class="secondary" id="prevBtn">Previous question</button>
+            <button class="primary" id="nextBtn">Next question</button>
+          </div>
         </div>
 
         <div class="feedback" id="feedback"></div>
@@ -865,9 +886,11 @@ const attackBadge = document.getElementById('attackBadge');
 const optionsEl = document.getElementById('options');
 const feedback = document.getElementById('feedback');
 const submitBtn = document.getElementById('submitBtn');
+const hintBtn = document.getElementById('hintBtn');
 const tryBtn = document.getElementById('tryBtn');
 const showBtn = document.getElementById('showBtn');
 const nextBtn = document.getElementById('nextBtn');
+const prevBtn = document.getElementById('prevBtn');
 const quizContent = document.getElementById('quizContent');
 const review = document.getElementById('review');
 
@@ -914,7 +937,7 @@ function renderQuestion() {
   submitBtn.style.display = '';
   tryBtn.style.display = 'none';
   showBtn.style.display = 'none';
-  nextBtn.style.display = 'none';
+  nextBtn.style.display = '';
 }
 
 function markOptions(showCorrectOnly=false) {
@@ -952,17 +975,18 @@ function submitAnswer() {
   } else {
     document.querySelectorAll('.option').forEach(el => {
       const type = el.dataset.type;
+      if (selected.has(type) && correct.has(type)) el.classList.add('selected-correct');
       if (selected.has(type) && !correct.has(type)) el.classList.add('wrong');
       if (!selected.has(type) && correct.has(type)) el.classList.add('missed');
     });
     feedback.className = 'feedback show bad';
     feedback.innerHTML = `<h3>❌ Not quite — try again.</h3>
-      <div class="answer-line">Red = selected but incorrect. Amber = correct answer missed.</div>
+      <div class="answer-line">Blue = correct answer you selected. Red = selected but incorrect. Amber = correct answer missed.</div>
       <div class="answer-line">Use the feedback to adjust your answer and resubmit.</div>`;
     submitBtn.style.display = 'none';
     tryBtn.style.display = '';
     showBtn.style.display = '';
-    nextBtn.style.display = 'none';
+    nextBtn.style.display = '';
   }
 }
 
@@ -970,7 +994,7 @@ function tryAgain() {
   checked = false;
   selected = new Set();
   document.querySelectorAll('.option').forEach(el => {
-    el.classList.remove('selected','correct','missed','wrong');
+    el.classList.remove('selected','correct','selected-correct','missed','wrong');
   });
   feedback.className = 'feedback';
   feedback.innerHTML = '';
@@ -995,7 +1019,31 @@ function showAnswer() {
   nextBtn.style.display = '';
 }
 
+
+function showHint() {
+  const q = QUESTIONS[current];
+  const count = q.correct.length;
+  feedback.className = 'feedback show';
+  feedback.innerHTML = `<h3>💡 Hint</h3>
+    <div class="answer-line">There ${count === 1 ? 'is' : 'are'} <strong>${count}</strong> correct answer${count === 1 ? '' : 's'} for this question.</div>
+    <div class="answer-line">Select exactly ${count} option${count === 1 ? '' : 's'}, then submit.</div>`;
+}
+
+
+function confirmMove(direction) {
+  const label = direction === 'next' ? 'next question' : 'previous question';
+  return window.confirm(`Are you sure you want to move to the ${label}?`);
+}
+
+function previousQuestion() {
+  if (!confirmMove('previous')) return;
+  current -= 1;
+  if (current < 0) current = QUESTIONS.length - 1;
+  renderQuestion();
+}
+
 function nextQuestion() {
+  if (!confirmMove('next')) return;
   current += 1;
   if (current >= QUESTIONS.length) return showReview();
   renderQuestion();
@@ -1036,9 +1084,11 @@ function restart() {
 }
 
 submitBtn.addEventListener('click', submitAnswer);
+hintBtn.addEventListener('click', showHint);
 tryBtn.addEventListener('click', tryAgain);
 showBtn.addEventListener('click', showAnswer);
 nextBtn.addEventListener('click', nextQuestion);
+prevBtn.addEventListener('click', previousQuestion);
 document.getElementById('restartBtn').addEventListener('click', restart);
 
 renderQuestion();
