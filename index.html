@@ -1020,30 +1020,27 @@ function showAnswer() {
 }
 
 
+
 function showHint() {
   const q = QUESTIONS[current];
-  const count = q.correct.length;
+  const answerCount = Array.isArray(q.correct) ? q.correct.length : 0;
+  const word = answerCount === 1 ? 'answer' : 'answers';
+  const isAre = answerCount === 1 ? 'is' : 'are';
+  const optionWord = answerCount === 1 ? 'option' : 'options';
+
   feedback.className = 'feedback show';
   feedback.innerHTML = `<h3>💡 Hint</h3>
-    <div class="answer-line">There ${count === 1 ? 'is' : 'are'} <strong>${count}</strong> correct answer${count === 1 ? '' : 's'} for this question.</div>
-    <div class="answer-line">Select exactly ${count} option${count === 1 ? '' : 's'}, then submit.</div>`;
-}
-
-
-function confirmMove(direction) {
-  const label = direction === 'next' ? 'next question' : 'previous question';
-  return window.confirm(`Are you sure you want to move to the ${label}?`);
+    <div class="answer-line">There ${isAre} <strong>${answerCount}</strong> correct ${word} for this question.</div>
+    <div class="answer-line">Select exactly <strong>${answerCount}</strong> ${optionWord}, then press <strong>Submit answer</strong>.</div>`;
 }
 
 function previousQuestion() {
-  if (!confirmMove('previous')) return;
   current -= 1;
   if (current < 0) current = QUESTIONS.length - 1;
   renderQuestion();
 }
 
 function nextQuestion() {
-  if (!confirmMove('next')) return;
   current += 1;
   if (current >= QUESTIONS.length) return showReview();
   renderQuestion();
